@@ -1,0 +1,864 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Quản Lý Chi Phí Sách Vở & Đồ Dùng Học Tập</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800&family=Playfair+Display:ital,wght@0,600;0,700;1,400&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg-main: #edf4fa;
+      --bg-card: rgba(255, 255, 255, 0.88);
+      --primary: #4a7bb0;
+      --primary-hover: #3b6594;
+      --primary-light: #e2eef9;
+      --accent-pastel: #87b3db;
+      --accent-soft: #b9d5ed;
+      --text-dark: #2c3e50;
+      --text-muted: #6c829b;
+      --border-color: #d2e3f3;
+      --success: #52a386;
+      --danger: #e06d75;
+      --shadow-sm: 0 4px 12px rgba(67, 108, 149, 0.08);
+      --shadow-md: 0 8px 24px rgba(67, 108, 149, 0.12);
+      --radius-lg: 16px;
+      --radius-md: 10px;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    
+    body {
+      font-family: 'Nunito', sans-serif;
+      background-color: var(--bg-main);
+      color: var(--text-dark);
+      line-height: 1.5;
+      padding-bottom: 60px;
+      background-image: 
+        radial-gradient(circle at 10% 20%, rgba(135, 179, 219, 0.15) 0%, transparent 20%),
+        radial-gradient(circle at 90% 80%, rgba(185, 213, 237, 0.2) 0%, transparent 25%),
+        url("data:image/svg+xml,%3Csvg width='80' height='80' viewBox='0 0 80 80' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M40 0 C45 20, 60 35, 80 40 C60 45, 45 60, 40 80 C35 60, 20 45, 0 40 C20 35, 35 20, 40 0 Z' fill='%2094bee0' fill-opacity='0.04'/%3E%3C/svg%3E");
+    }
+
+    .container {
+      max-width: 1100px;
+      margin: 0 auto;
+      padding: 20px 15px;
+    }
+
+    /* Elegant Header */
+    header {
+      text-align: center;
+      padding: 30px 20px;
+      margin-bottom: 25px;
+      background: var(--bg-card);
+      backdrop-filter: blur(10px);
+      border-radius: var(--radius-lg);
+      box-shadow: var(--shadow-sm);
+      border: 1px solid rgba(255, 255, 255, 0.6);
+      position: relative;
+      overflow: hidden;
+    }
+
+    header::before {
+      content: "✧ ❀ ✧ ❁ ✧ ❀ ✧";
+      display: block;
+      font-size: 1rem;
+      color: var(--accent-pastel);
+      letter-spacing: 8px;
+      margin-bottom: 8px;
+      animation: twinkle 3s ease-in-out infinite;
+    }
+
+    @keyframes twinkle {
+      0%, 100% { opacity: 0.6; }
+      50% { opacity: 1; }
+    }
+
+    header h1 {
+      font-family: 'Playfair Display', serif;
+      color: #244469;
+      font-size: 2.1rem;
+      font-weight: 700;
+    }
+
+    header p {
+      color: var(--text-muted);
+      font-style: italic;
+      margin-top: 5px;
+      font-size: 0.95rem;
+    }
+
+    /* Dashboard Summary Cards */
+    .summary-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+      gap: 15px;
+      margin-bottom: 30px;
+    }
+
+    .summary-card {
+      background: var(--bg-card);
+      padding: 20px;
+      border-radius: var(--radius-lg);
+      box-shadow: var(--shadow-sm);
+      border: 1px solid white;
+      text-align: center;
+      transition: transform 0.2s ease;
+    }
+
+    .summary-card:hover { transform: translateY(-3px); }
+
+    .summary-card h3 {
+      font-size: 0.9rem;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      color: var(--text-muted);
+      margin-bottom: 8px;
+    }
+
+    .summary-card .amount {
+      font-size: 1.5rem;
+      font-weight: 800;
+      color: var(--primary);
+    }
+
+    .summary-card.grand-total {
+      background: linear-gradient(135deg, #4a7bb0, #365d88);
+      color: white;
+      animation: glowPulse 3s ease-in-out infinite;
+    }
+
+    @keyframes glowPulse {
+      0%, 100% { box-shadow: 0 8px 24px rgba(74, 123, 176, 0.3); }
+      50% { box-shadow: 0 8px 32px rgba(74, 123, 176, 0.5); }
+    }
+
+    .summary-card.grand-total h3 { color: rgba(255, 255, 255, 0.85); }
+    .summary-card.grand-total .amount { color: #ffffff; font-size: 1.7rem; }
+
+    .progress-bar-bg {
+      background: #dce7f3;
+      height: 8px;
+      border-radius: 4px;
+      overflow: hidden;
+      margin-top: 10px;
+    }
+
+    .progress-bar-fill {
+      background: var(--success);
+      height: 100%;
+      width: 0%;
+      transition: width 0.3s ease;
+    }
+
+    /* Action Buttons Bar */
+    .action-bar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 25px;
+      flex-wrap: wrap;
+      gap: 12px;
+    }
+
+    .btn {
+      padding: 10px 18px;
+      border: none;
+      border-radius: 20px;
+      font-family: inherit;
+      font-size: 0.9rem;
+      font-weight: 700;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      transition: all 0.2s ease;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.06);
+    }
+
+    .btn-primary { background: var(--primary); color: white; }
+    .btn-primary:hover { background: var(--primary-hover); }
+    .btn-secondary { background: white; color: var(--primary); border: 1px solid var(--border-color); }
+    .btn-secondary:hover { background: var(--primary-light); }
+    .btn-danger-soft { background: #fde8e8; color: var(--danger); }
+    .btn-danger-soft:hover { background: #fbcbcb; }
+
+    /* Main Section Style */
+    .section-title {
+      font-family: 'Playfair Display', serif;
+      font-size: 1.5rem;
+      color: #1e3a5f;
+      margin: 35px 0 15px 0;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding-bottom: 8px;
+      border-bottom: 2px dashed var(--accent-pastel);
+    }
+
+    .card {
+      background: var(--bg-card);
+      border-radius: var(--radius-lg);
+      padding: 20px;
+      margin-bottom: 20px;
+      box-shadow: var(--shadow-sm);
+      border: 1px solid rgba(255, 255, 255, 0.8);
+    }
+
+    .subject-header {
+      font-size: 1.15rem;
+      font-weight: 700;
+      color: #2b5278;
+      margin-bottom: 15px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 6px 12px;
+      background: var(--primary-light);
+      border-radius: var(--radius-md);
+      width: fit-content;
+    }
+
+    .sub-group-title {
+      font-size: 0.95rem;
+      font-weight: 700;
+      color: var(--primary);
+      margin: 15px 0 10px 0;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    /* Table Styling */
+    .item-table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-bottom: 10px;
+    }
+
+    .item-table th {
+      text-align: left;
+      padding: 10px;
+      font-size: 0.8rem;
+      text-transform: uppercase;
+      color: var(--text-muted);
+      border-bottom: 1px solid var(--border-color);
+    }
+
+    .item-table td {
+      padding: 10px;
+      border-bottom: 1px solid #f0f5fa;
+      font-size: 0.92rem;
+      vertical-align: middle;
+    }
+
+    .item-row.bought {
+      background-color: rgba(235, 243, 250, 0.5);
+    }
+
+    .item-row.bought .item-name {
+      text-decoration: line-through;
+      color: #9cb1c9;
+    }
+
+    .item-name {
+      max-width: 320px;
+    }
+
+    .item-note {
+      font-size: 0.72rem;
+      color: #8aa3bd;
+      font-style: italic;
+      margin-top: 2px;
+      font-weight: 400;
+    }
+
+    .checkbox-custom {
+      width: 18px;
+      height: 18px;
+      cursor: pointer;
+      accent-color: var(--primary);
+    }
+
+    .btn-icon {
+      background: none;
+      border: none;
+      cursor: pointer;
+      font-size: 1rem;
+      padding: 4px 6px;
+      border-radius: 4px;
+      color: var(--text-muted);
+      transition: color 0.2s;
+    }
+
+    .btn-icon:hover { color: var(--primary); }
+    .btn-icon.delete:hover { color: var(--danger); }
+
+    /* Subject Total */
+    .subject-total {
+      text-align: right;
+      font-size: 0.88rem;
+      color: var(--text-muted);
+      margin-top: 12px;
+      padding-top: 10px;
+      border-top: 1px dashed var(--accent-soft);
+    }
+
+    .subject-total strong {
+      color: var(--primary);
+      font-size: 1.05rem;
+      font-weight: 800;
+    }
+
+    /* Modal Form */
+    .modal {
+      display: none;
+      position: fixed;
+      top: 0; left: 0; width: 100%; height: 100%;
+      background: rgba(30, 50, 70, 0.4);
+      backdrop-filter: blur(4px);
+      justify-content: center;
+      align-items: center;
+      z-index: 1000;
+    }
+
+    .modal-content {
+      background: white;
+      padding: 30px;
+      border-radius: var(--radius-lg);
+      width: 90%;
+      max-width: 480px;
+      box-shadow: var(--shadow-md);
+    }
+
+    .modal-header {
+      font-family: 'Playfair Display', serif;
+      font-size: 1.3rem;
+      color: var(--primary);
+      margin-bottom: 20px;
+    }
+
+    .form-group {
+      margin-bottom: 15px;
+    }
+
+    .form-group label {
+      display: block;
+      font-size: 0.85rem;
+      font-weight: 700;
+      margin-bottom: 5px;
+      color: var(--text-dark);
+    }
+
+    .form-control {
+      width: 100%;
+      padding: 10px 12px;
+      border: 1px solid var(--border-color);
+      border-radius: var(--radius-md);
+      font-family: inherit;
+      font-size: 0.95rem;
+    }
+
+    .form-control:focus {
+      outline: none;
+      border-color: var(--primary);
+      box-shadow: 0 0 0 3px rgba(74, 123, 176, 0.15);
+    }
+
+    .modal-footer {
+      display: flex;
+      justify-content: flex-end;
+      gap: 10px;
+      margin-top: 20px;
+    }
+
+    /* Print Styles */
+    @media print {
+      body { background: white; color: black; padding: 0; }
+      .action-bar, .btn-icon, .modal { display: none !important; }
+      .card, header { box-shadow: none; border: 1px solid #ccc; background: white; }
+    }
+
+    /* Responsive */
+    @media (max-width: 600px) {
+      .item-table th:nth-child(4), .item-table td:nth-child(4) { display: none; }
+      .summary-card .amount { font-size: 1.3rem; }
+      .item-name { max-width: 180px; }
+    }
+  </style>
+</head>
+<body>
+
+  <div class="container">
+    <header>
+      <h1>Sổ Tay Chi Phí Học Tập</h1>
+      <p>Năm Học Lớp 12 — Thanh Lịch &amp; Tự Động Tính Toán</p>
+    </header>
+
+    <!-- Dashboard Thống Kê -->
+    <div class="summary-grid">
+      <div class="summary-card">
+        <h3>Đồ Dùng Học Tập</h3>
+        <div class="amount" id="total-p1">0 VNĐ</div>
+      </div>
+      <div class="summary-card">
+        <h3>Sách &amp; Vở Ghi</h3>
+        <div class="amount" id="total-p2">0 VNĐ</div>
+      </div>
+      <div class="summary-card grand-total">
+        <h3>Tổng Chi Phí Dự Kiến</h3>
+        <div class="amount" id="grand-total">0 VNĐ</div>
+      </div>
+      <div class="summary-card">
+        <h3>Tiến Độ Mua Sắm</h3>
+        <div class="amount" id="purchase-progress">0/0</div>
+        <div class="progress-bar-bg">
+          <div class="progress-bar-fill" id="progress-fill"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Thanh Hành Động -->
+    <div class="action-bar">
+      <div>
+        <button class="btn btn-primary" onclick="openModal()">➕ Thêm Món Mới</button>
+      </div>
+      <div style="display: flex; gap: 8px;">
+        <button class="btn btn-secondary" onclick="window.print()">🖨️ In Danh Sách / PDF</button>
+        <button class="btn btn-danger-soft" onclick="resetDefaultData()">🔄 Khôi Phục Gốc</button>
+      </div>
+    </div>
+
+    <!-- PHẦN 1 -->
+    <div class="section-title">❀ Phần 1: Đồ Dùng Học Tập</div>
+    <div class="card">
+      <table class="item-table">
+        <thead>
+          <tr>
+            <th style="width: 35px;">Tính</th>
+            <th style="width: 35px;">Mua</th>
+            <th>Tên Món Đồ</th>
+            <th>Đơn Giá</th>
+            <th>SL</th>
+            <th>Thành Tiền</th>
+            <th style="width: 60px;"></th>
+          </tr>
+        </thead>
+        <tbody id="list-p1"></tbody>
+      </table>
+    </div>
+
+    <!-- PHẦN 2 -->
+    <div class="section-title">❀ Phần 2: Sách &amp; Vở Theo Môn</div>
+    <div id="container-p2"></div>
+
+  </div>
+
+  <!-- Modal Thêm/Sửa Món -->
+  <div class="modal" id="itemModal">
+    <div class="modal-content">
+      <div class="modal-header" id="modalTitle">Thêm Món Đồ Mới</div>
+      <form id="itemForm" onsubmit="saveItem(event)">
+        <input type="hidden" id="itemId">
+        <div class="form-group">
+          <label>Phân Loại Phần</label>
+          <select id="itemPart" class="form-control" onchange="togglePartSelect()">
+            <option value="p1">Phần 1: Đồ Dùng Học Tập</option>
+            <option value="p2">Phần 2: Sách &amp; Vở</option>
+          </select>
+        </div>
+        <div class="form-group" id="groupSubject" style="display: none;">
+          <label>Môn Học</label>
+          <select id="itemSubject" class="form-control">
+            <option value="Toán">Môn Toán</option>
+            <option value="Vật Lý">Môn Vật Lý</option>
+            <option value="Tiếng Anh">Môn Tiếng Anh</option>
+            <option value="HSA">Môn HSA</option>
+            <option value="Văn">Môn Văn</option>
+            <option value="Tiếng Trung">Môn Tiếng Trung</option>
+            <option value="Học Thêm">Học Thêm</option>
+          </select>
+        </div>
+        <div class="form-group" id="groupCategory" style="display: none;">
+          <label>Nhóm</label>
+          <select id="itemCategory" class="form-control">
+            <option value="Sách tham khảo">Sách tham khảo</option>
+            <option value="Vở ghi">Vở ghi &amp; Dụng cụ</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>Tên Món Đồ</label>
+          <input type="text" id="itemName" class="form-control" required placeholder="Nhập tên món...">
+        </div>
+        <div class="form-group">
+          <label>Đơn Giá (k / nghìn đồng)</label>
+          <input type="number" id="itemPrice" class="form-control" step="0.1" required placeholder="Ví dụ: 69">
+        </div>
+        <div class="form-group">
+          <label>Số Lượng</label>
+          <input type="number" id="itemQty" class="form-control" min="1" value="1" required>
+        </div>
+        <div class="form-group">
+          <label>Ghi Chú</label>
+          <input type="text" id="itemNote" class="form-control" placeholder="Ví dụ: Chữa bài - Tổng ôn">
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" onclick="closeModal()">Hủy</button>
+          <button type="submit" class="btn btn-primary">Lưu Món Đồ</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <script>
+    // ================================================================
+    // DỮ LIỆU MẶC ĐỊNH — PHẦN 1 GIỮ NGUYÊN, PHẦN 2 CẬP NHẬT THEO BẢNG
+    // ================================================================
+    const defaultData = [
+
+      // ================= PHẦN 1: ĐỒ DÙNG HỌC TẬP (GIỮ NGUYÊN) =================
+      { id: '1', part: 'p1', name: 'Bộ Pastel Rửa được', price: 69, qty: 1, calc: true, bought: false },
+      { id: '2', part: 'p1', name: '60 SWM - COISIDS', price: 141, qty: 1, calc: true, bought: false },
+      { id: '3', part: 'p1', name: 'Hộp 6 gôm tẩy Deli Nusign', price: 41, qty: 1, calc: true, bought: false },
+      { id: '4', part: 'p1', name: 'Bút xóa băng 40m Deli', price: 34, qty: 5, calc: true, bought: false },
+      { id: '5', part: 'p1', name: 'Hộp 100 ngòi Deli 0.7mm', price: 14, qty: 1, calc: true, bought: false },
+      { id: '6', part: 'p1', name: 'Ghim tài liệu số 10 | 12 Deli', price: 7, qty: 1, calc: true, bought: false },
+      { id: '7', part: 'p1', name: 'Hộp 5 bút Deli AS75 - xanh', price: 62, qty: 1, calc: true, bought: false },
+      { id: '8', part: 'p1', name: 'Hộp 20 ruột bút G97 - BL', price: 70, qty: 1, calc: true, bought: false },
+      { id: '9', part: 'p1', name: 'Hộp 12 Bút bi nước xanh', price: 5, qty: 12, calc: true, bought: false },
+      { id: '10', part: 'p1', name: 'Hộp 12 Bút bi nước đen', price: 5, qty: 12, calc: true, bought: false },
+      { id: '11', part: 'p1', name: 'Hộp 12 bút G057 xanh', price: 12, qty: 12, calc: true, bought: false },
+      { id: '12', part: 'p1', name: 'Hộp 5 bút G057 đỏ', price: 13, qty: 5, calc: true, bought: false },
+      { id: '13', part: 'p1', name: 'Thước kẻ trung suất Deli', price: 7, qty: 5, calc: true, bought: false },
+      { id: '14', part: 'p1', name: 'Compa', price: 25, qty: 1, calc: true, bought: false },
+      { id: '15', part: 'p1', name: 'Hộp 10 chiếc lưỡi dao dọc giấy', price: 16, qty: 1, calc: true, bought: false },
+      { id: '16', part: 'p1', name: 'Hộp bút Cream cheese phong cách Hàn', price: 55, qty: 1, calc: true, bought: false },
+      { id: '17', part: 'p1', name: 'Bút bi nước mực gel bấm EG118 nhiều màu', price: 10, qty: 3, calc: true, bought: false },
+      { id: '18', part: 'p1', name: 'Bút chì kim Q SH12 - 07', price: 14, qty: 3, calc: true, bought: false },
+      { id: '19', part: 'p1', name: 'Study Planner', price: 35, qty: 3, calc: true, bought: false },
+      { id: '20', part: 'p1', name: 'Balo da pu Maprick', price: 129, qty: 1, calc: true, bought: false },
+
+      // ================= PHẦN 2: SÁCH & VỞ THEO MÔN (CẬP NHẬT) =================
+
+      // --- MÔN TOÁN ---
+      { id: '201', part: 'p2', subject: 'Toán', category: 'Sách tham khảo', name: 'Tổng ôn toán MOON TẬP 1+2', price: 237, qty: 1, calc: true, bought: false, note: '' },
+      { id: '202', part: 'p2', subject: 'Toán', category: 'Sách tham khảo', name: '60 đề toán MOON', price: 136, qty: 1, calc: true, bought: false, note: '' },
+      { id: '203', part: 'p2', subject: 'Toán', category: 'Sách tham khảo', name: '30 đề toán AZ', price: 87, qty: 1, calc: true, bought: false, note: '' },
+      { id: '204', part: 'p2', subject: 'Toán', category: 'Vở ghi', name: 'Sổ kẻ ngang may dán gáy Tili Dreamland A4 300 trang KLONG MS 212', price: 42, qty: 1, calc: true, bought: false, note: 'Chữa bài - Tổng ôn' },
+      { id: '205', part: 'p2', subject: 'Toán', category: 'Vở ghi', name: 'Sổ Dash Caro KLONG B5 120 trang (MS: 508)', price: 32, qty: 1, calc: true, bought: false, note: 'Công thức Toán' },
+      { id: '206', part: 'p2', subject: 'Toán', category: 'Vở ghi', name: 'Sổ Caro (6x6)mm lò xo đơn A4 KLONG 200 trang MS 590', price: 55, qty: 1, calc: true, bought: false, note: 'Chữa đề Toán' },
+
+      // --- MÔN VẬT LÝ ---
+      { id: '207', part: 'p2', subject: 'Vật Lý', category: 'Sách tham khảo', name: 'Tổng ôn vật lý MOON TẬP 1+2', price: 242, qty: 1, calc: true, bought: false, note: '' },
+      { id: '208', part: 'p2', subject: 'Vật Lý', category: 'Sách tham khảo', name: '60 đề lý MOON', price: 134, qty: 1, calc: true, bought: false, note: '' },
+      { id: '209', part: 'p2', subject: 'Vật Lý', category: 'Sách tham khảo', name: '30 đề lý AZ', price: 78, qty: 1, calc: true, bought: false, note: '' },
+      { id: '210', part: 'p2', subject: 'Vật Lý', category: 'Sách tham khảo', name: 'LÍ THUYẾT 360 VẬT LÍ 12', price: 184, qty: 1, calc: true, bought: false, note: '' },
+      { id: '211', part: 'p2', subject: 'Vật Lý', category: 'Sách tham khảo', name: 'Trọng tâm lý thuyết lý', price: 81, qty: 1, calc: true, bought: false, note: '' },
+      { id: '212', part: 'p2', subject: 'Vật Lý', category: 'Sách tham khảo', name: 'Tinh hoa lý thuyết Vật lý 12', price: 143, qty: 1, calc: true, bought: false, note: '' },
+      { id: '213', part: 'p2', subject: 'Vật Lý', category: 'Vở ghi', name: 'Sổ kẻ ngang may dán gáy Tili Dreamland A4 300 trang KLONG MS 212', price: 42, qty: 1, calc: true, bought: false, note: 'Chữa bài - Tổng ôn' },
+      { id: '214', part: 'p2', subject: 'Vật Lý', category: 'Vở ghi', name: 'Sổ Dash Caro KLONG B5 120 trang (MS: 508)', price: 32, qty: 1, calc: true, bought: false, note: 'Công thức Lý' },
+      { id: '215', part: 'p2', subject: 'Vật Lý', category: 'Vở ghi', name: 'Sổ Caro (6x6)mm lò xo đơn A4 KLONG 200 trang MS 590', price: 55, qty: 1, calc: true, bought: false, note: 'Chữa đề' },
+      { id: '216', part: 'p2', subject: 'Vật Lý', category: 'Vở ghi', name: 'Vở Dash Caro (7x7)mm may dán gáy KLONG B5 120 trang MS 853', price: 35, qty: 1, calc: true, bought: false, note: 'Lí thuyết - Lý thuyết' },
+      { id: '217', part: 'p2', subject: 'Vật Lý', category: 'Vở ghi', name: 'Vở Dash Caro (7x7)mm may dán gáy KLONG B5 120 trang MS 853', price: 35, qty: 1, calc: true, bought: false, note: 'Chữa bài - Trọng tâm' },
+      { id: '218', part: 'p2', subject: 'Vật Lý', category: 'Vở ghi', name: 'Vở Dash Caro (7x7)mm may dán gáy KLONG B5 120 trang MS 853', price: 35, qty: 1, calc: true, bought: false, note: 'Chữa bài - Tinh hoa' },
+
+      // --- MÔN TIẾNG ANH ---
+      { id: '219', part: 'p2', subject: 'Tiếng Anh', category: 'Sách tham khảo', name: 'Tổng ôn từ vựng tập 1 + 2', price: 170, qty: 1, calc: true, bought: false, note: '' },
+      { id: '220', part: 'p2', subject: 'Tiếng Anh', category: 'Sách tham khảo', name: 'Từ vựng tiếng Anh Word Formation', price: 112, qty: 1, calc: true, bought: false, note: '' },
+      { id: '221', part: 'p2', subject: 'Tiếng Anh', category: 'Sách tham khảo', name: '4500 English Collocation and Idioms', price: 160, qty: 1, calc: true, bought: false, note: '' },
+      { id: '222', part: 'p2', subject: 'Tiếng Anh', category: 'Sách tham khảo', name: 'Chép bút 1000 Writing', price: 213, qty: 1, calc: true, bought: false, note: '' },
+      { id: '223', part: 'p2', subject: 'Tiếng Anh', category: 'Sách tham khảo', name: 'VocabFocus – Core English Vocabulary – A1-A2', price: 144, qty: 1, calc: true, bought: false, note: '' },
+      { id: '224', part: 'p2', subject: 'Tiếng Anh', category: 'Sách tham khảo', name: 'Trọng Tâm Kiến Thức Môn Tiếng Anh Ôn Thi TNPT', price: 156, qty: 1, calc: true, bought: false, note: '' },
+      { id: '225', part: 'p2', subject: 'Tiếng Anh', category: 'Sách tham khảo', name: '60 đề Anh', price: 134, qty: 1, calc: true, bought: false, note: '' },
+      { id: '226', part: 'p2', subject: 'Tiếng Anh', category: 'Vở ghi', name: 'File còng sắt 8 châu A4 (MS: 539) KLONG', price: 64, qty: 3, calc: true, bought: false, note: 'Lý thuyết' },
+      { id: '227', part: 'p2', subject: 'Tiếng Anh', category: 'Vở ghi', name: 'Ruột sổ còng Dash Line A4 100 tờ (MS: 527) KLONG', price: 45, qty: 4, calc: true, bought: false, note: '' },
+
+      // --- MÔN HSA ---
+      { id: '228', part: 'p2', subject: 'HSA', category: 'Sách tham khảo', name: 'HSA Anh HỌC MÃI', price: 177, qty: 1, calc: true, bought: false, note: '' },
+      { id: '229', part: 'p2', subject: 'HSA', category: 'Sách tham khảo', name: 'HSA Anh MOON', price: 135, qty: 1, calc: true, bought: false, note: '' },
+      { id: '230', part: 'p2', subject: 'HSA', category: 'Sách tham khảo', name: 'HSA 333 câu hỏi tiếng Anh', price: 54, qty: 1, calc: true, bought: false, note: '' },
+      { id: '231', part: 'p2', subject: 'HSA', category: 'Sách tham khảo', name: 'LUYỆN THI ĐGNL — TIẾNG ANH (EMPIRE TEAM)', price: 100, qty: 1, calc: true, bought: false, note: 'in còng - A4' },
+      { id: '232', part: 'p2', subject: 'HSA', category: 'Sách tham khảo', name: 'HSA Văn MOON', price: 137, qty: 1, calc: true, bought: false, note: '' },
+      { id: '233', part: 'p2', subject: 'HSA', category: 'Sách tham khảo', name: 'HSA Toán - Tổng Ôn Phần Toán Học Và Xử lý Số Liệu', price: 137, qty: 1, calc: true, bought: false, note: '' },
+      { id: '234', part: 'p2', subject: 'HSA', category: 'Sách tham khảo', name: 'HSA Toán - Định lượng và định tính', price: 212, qty: 1, calc: true, bought: false, note: '' },
+      { id: '235', part: 'p2', subject: 'HSA', category: 'Sách tham khảo', name: 'Bộ đề thi ĐGNL ĐHQGHN', price: 185, qty: 1, calc: true, bought: false, note: '' },
+      { id: '236', part: 'p2', subject: 'HSA', category: 'Sách tham khảo', name: 'LUYỆN THI ĐGNL — TƯ DUY ĐỊNH LƯỢNG (EMPIRE TEAM)', price: 80, qty: 1, calc: true, bought: false, note: 'in còng - A4' },
+      { id: '237', part: 'p2', subject: 'HSA', category: 'Sách tham khảo', name: 'LUYỆN THI ĐGNL — TOÁN LOGIC & PHÂN TÍCH SỐ LIỆU (EMPIRE TEAM)', price: 80, qty: 1, calc: true, bought: false, note: 'in còng - A4' },
+      { id: '238', part: 'p2', subject: 'HSA', category: 'Sách tham khảo', name: 'LUYỆN THI ĐGNL — TƯ DUY ĐỊNH TÍNH (EMPIRE TEAM)', price: 100, qty: 1, calc: true, bought: false, note: 'in còng - A4' },
+      { id: '239', part: 'p2', subject: 'HSA', category: 'Sách tham khảo', name: '15 ĐỀ THỰC CHIẾN HSA (EMPIRE TEAM)', price: 100, qty: 1, calc: true, bought: false, note: 'in còng - A4' },
+      { id: '240', part: 'p2', subject: 'HSA', category: 'Sách tham khảo', name: 'BỘ ĐỀ THỰC CHIẾN HSA', price: 100, qty: 1, calc: true, bought: false, note: 'in còng - A4' },
+      { id: '241', part: 'p2', subject: 'HSA', category: 'Vở ghi', name: 'Vở kẻ ngang A4 có chấm People 200 trang CAMPUS', price: 61, qty: 1, calc: true, bought: false, note: 'Lý thuyết + bài tập - HSA Văn Moon' },
+      { id: '242', part: 'p2', subject: 'HSA', category: 'Vở ghi', name: 'Vở Dash Caro (7x7)mm may dán gáy KLONG B5 200 trang MS 854', price: 35, qty: 1, calc: true, bought: false, note: 'Lý thuyết + bài tập - HSA Toán MOON' },
+      { id: '243', part: 'p2', subject: 'HSA', category: 'Vở ghi', name: 'Sổ lò xo basic CAMPUS 240 trang - A4', price: 62, qty: 1, calc: true, bought: false, note: 'Lý thuyết + bài tập - HSA Toán MOON' },
+      { id: '244', part: 'p2', subject: 'HSA', category: 'Vở ghi', name: 'Sổ lò xo basic CAMPUS 240 trang - A4', price: 62, qty: 1, calc: true, bought: false, note: 'Chữa đề - 20 đề MOON' },
+      { id: '245', part: 'p2', subject: 'HSA', category: 'Vở ghi', name: 'Sổ Caro (6x6)mm lò xo đơn A4 KLONG 200 trang MS 590', price: 55, qty: 1, calc: true, bought: false, note: 'Lý thuyết + bài tập - Định lượng Empire' },
+      { id: '246', part: 'p2', subject: 'HSA', category: 'Vở ghi', name: 'Sổ Caro (6x6)mm lò xo đơn A4 KLONG 200 trang MS 590', price: 55, qty: 1, calc: true, bought: false, note: 'Lý thuyết + bài tập - Logic Empire' },
+      { id: '247', part: 'p2', subject: 'HSA', category: 'Vở ghi', name: 'Vở kẻ ngang A4 có chấm People 200 trang CAMPUS', price: 61, qty: 1, calc: true, bought: false, note: 'Lý thuyết + bài tập - Định tính Empire' },
+      { id: '248', part: 'p2', subject: 'HSA', category: 'Vở ghi', name: 'Sổ lò xo basic CAMPUS 240 trang - A4', price: 62, qty: 1, calc: true, bought: false, note: 'Chữa đề' },
+
+      // --- MÔN VĂN ---
+      { id: '249', part: 'p2', subject: 'Văn', category: 'Sách tham khảo', name: 'SỔ TAY NÂNG CẤP DIỄN ĐẠT TỪ VIẾT ĐÚNG TỚI VIẾT HAY', price: 100, qty: 1, calc: true, bought: false, note: 'in còng - A5' },
+      { id: '250', part: 'p2', subject: 'Văn', category: 'Sách tham khảo', name: 'CHINH PHỤC 10 ĐỌC HIỂU', price: 100, qty: 1, calc: true, bought: false, note: 'in còng - A5' },
+      { id: '251', part: 'p2', subject: 'Văn', category: 'Sách tham khảo', name: 'HẢI TRÌNH 9+ Tập 1-2', price: 120, qty: 1, calc: true, bought: false, note: 'in còng - A5' },
+      { id: '252', part: 'p2', subject: 'Văn', category: 'Vở ghi', name: 'Vở gáy keo Cafe kẻ ngang - Xanh rau má 120tr', price: 26, qty: 1, calc: true, bought: false, note: 'Làm bài - Nâng cấp diễn đạt' },
+      { id: '253', part: 'p2', subject: 'Văn', category: 'Vở ghi', name: 'Vở gáy keo Cafe kẻ ngang - Cookies 200tr', price: 37, qty: 1, calc: true, bought: false, note: 'Làm bài - Đọc hiểu' },
+      { id: '254', part: 'p2', subject: 'Văn', category: 'Vở ghi', name: 'Vở kẻ ngang A4 có chấm People 200 trang CAMPUS', price: 61, qty: 1, calc: true, bought: false, note: 'Làm bài - Hải trình' },
+
+      // --- MÔN TIẾNG TRUNG ---
+      { id: '255', part: 'p2', subject: 'Tiếng Trung', category: 'Sách tham khảo', name: 'HSK 4 tâp 1+2', price: 120, qty: 1, calc: true, bought: false, note: 'in còng - A4' },
+      { id: '256', part: 'p2', subject: 'Tiếng Trung', category: 'Sách tham khảo', name: 'HSK 3 bài tập', price: 50, qty: 1, calc: true, bought: false, note: 'in còng - A4' },
+      { id: '257', part: 'p2', subject: 'Tiếng Trung', category: 'Sách tham khảo', name: 'HSK 4 bài tập tâp 1+2', price: 120, qty: 1, calc: true, bought: false, note: 'in còng - A4' },
+      { id: '258', part: 'p2', subject: 'Tiếng Trung', category: 'Vở ghi', name: 'Sổ Caro (6x6)mm lò xo đơn A4 KLONG 200 trang MS 590', price: 55, qty: 1, calc: true, bought: false, note: 'Viết bài' },
+      { id: '259', part: 'p2', subject: 'Tiếng Trung', category: 'Vở ghi', name: 'Vở Caro may dán gáy luyện viết tiếng Trung - vở ô diền 120 trang', price: 24, qty: 1, calc: true, bought: false, note: 'Luyện viết' },
+
+      // --- HỌC THÊM (KHÔNG SÁCH) ---
+      { id: '260', part: 'p2', subject: 'Học Thêm', category: 'Vở ghi', name: 'Vở Dash Caro (7x7)mm may dán gáy KLONG B5 200 trang MS 854', price: 35, qty: 2, calc: true, bought: false, note: 'Lý chiều + Lý sáng' },
+      { id: '261', part: 'p2', subject: 'Học Thêm', category: 'Vở ghi', name: 'Vở gáy keo Cafe kẻ ngang - Cam trà đào 120tr', price: 26, qty: 1, calc: true, bought: false, note: 'Văn sáng' },
+      { id: '262', part: 'p2', subject: 'Học Thêm', category: 'Vở ghi', name: 'Vở kẻ ngang A4 có chấm People 200 trang CAMPUS', price: 61, qty: 1, calc: true, bought: false, note: 'Văn chiều' },
+      { id: '263', part: 'p2', subject: 'Học Thêm', category: 'Vở ghi', name: 'Vở gáy keo Cafe kẻ ngang - Ổi hồng 200tr', price: 37, qty: 1, calc: true, bought: false, note: 'Tiếng Anh chiều' },
+      { id: '264', part: 'p2', subject: 'Học Thêm', category: 'Vở ghi', name: 'Sổ Caro (6x6)mm lò xo đơn A4 KLONG 200 trang MS 590', price: 55, qty: 1, calc: true, bought: false, note: 'Toán sáng' },
+      { id: '265', part: 'p2', subject: 'Học Thêm', category: 'Vở ghi', name: 'Sổ Caro (6x6)mm lò xo đơn A4 KLONG 200 trang MS 591', price: 78, qty: 1, calc: true, bought: false, note: 'Toán chiều' }
+    ];
+
+    // Key mới để trình duyệt tự tải dữ liệu cập nhật
+    let items = JSON.parse(localStorage.getItem('study_items_v4')) || JSON.parse(JSON.stringify(defaultData));
+
+    function formatMoney(amount) {
+      return (amount * 1000).toLocaleString('vi-VN') + ' VNĐ';
+    }
+
+    function render() {
+      // === PHẦN 1 ===
+      const p1List = document.getElementById('list-p1');
+      p1List.innerHTML = '';
+      items.filter(i => i.part === 'p1').forEach(item => {
+        p1List.appendChild(createRow(item));
+      });
+
+      // === PHẦN 2 ===
+      const p2Container = document.getElementById('container-p2');
+      p2Container.innerHTML = '';
+
+      const subjects = [
+        { name: 'Toán', icon: '📐' },
+        { name: 'Vật Lý', icon: '⚡' },
+        { name: 'Tiếng Anh', icon: '🔤' },
+        { name: 'HSA', icon: '🎓' },
+        { name: 'Văn', icon: '📖' },
+        { name: 'Tiếng Trung', icon: '🀄' },
+        { name: 'Học Thêm', icon: '✨' }
+      ];
+
+      subjects.forEach(sub => {
+        const subItems = items.filter(i => i.part === 'p2' && i.subject === sub.name);
+        if (subItems.length === 0) return;
+
+        // Tính tổng môn học
+        const subTotal = subItems.reduce((sum, item) => {
+          return sum + (item.calc ? item.price * item.qty : 0);
+        }, 0);
+
+        const card = document.createElement('div');
+        card.className = 'card';
+
+        let html = `<div class="subject-header">${sub.icon} Môn ${sub.name}</div>`;
+
+        ['Sách tham khảo', 'Vở ghi'].forEach(cat => {
+          const catItems = subItems.filter(i => i.category === cat);
+          if (catItems.length > 0) {
+            html += `<div class="sub-group-title">${cat === 'Sách tham khảo' ? '📚 Sách Tham Khảo' : '📓 Vở Ghi & Dụng Cụ'}</div>`;
+            html += `
+              <table class="item-table">
+                <thead>
+                  <tr>
+                    <th style="width: 35px;">Tính</th>
+                    <th style="width: 35px;">Mua</th>
+                    <th>Tên Món Đồ</th>
+                    <th>Đơn Giá</th>
+                    <th>SL</th>
+                    <th>Thành Tiền</th>
+                    <th style="width: 60px;"></th>
+                  </tr>
+                </thead>
+                <tbody id="tbl-${sub.name.replace(/\s/g,'-')}-${cat.replace(/\s/g,'-')}"></tbody>
+              </table>
+            `;
+          }
+        });
+
+        // Thêm tổng môn
+        html += `<div class="subject-total">Tổng môn ${sub.name}: <strong>${formatMoney(subTotal)}</strong></div>`;
+
+        card.innerHTML = html;
+        p2Container.appendChild(card);
+
+        // Đổ dữ liệu vào bảng
+        ['Sách tham khảo', 'Vở ghi'].forEach(cat => {
+          const tbodyId = `tbl-${sub.name.replace(/\s/g,'-')}-${cat.replace(/\s/g,'-')}`;
+          const tbody = document.getElementById(tbodyId);
+          if (tbody) {
+            const catItems = subItems.filter(i => i.category === cat);
+            catItems.forEach(item => tbody.appendChild(createRow(item)));
+          }
+        });
+      });
+
+      updateCalculations();
+      saveToStorage();
+    }
+
+    function createRow(item) {
+      const tr = document.createElement('tr');
+      tr.className = `item-row ${item.bought ? 'bought' : ''}`;
+      const total = item.price * item.qty;
+      const noteHtml = item.note ? `<div class="item-note">${item.note}</div>` : '';
+
+      tr.innerHTML = `
+        <td><input type="checkbox" class="checkbox-custom" ${item.calc ? 'checked' : ''} onchange="toggleCalc('${item.id}')"></td>
+        <td><input type="checkbox" class="checkbox-custom" ${item.bought ? 'checked' : ''} onchange="toggleBought('${item.id}')"></td>
+        <td class="item-name"><strong>${item.name}</strong>${noteHtml}</td>
+        <td>${item.price}k</td>
+        <td>${item.qty}</td>
+        <td><strong>${formatMoney(total)}</strong></td>
+        <td>
+          <button class="btn-icon" onclick="editItem('${item.id}')">✏️</button>
+          <button class="btn-icon delete" onclick="deleteItem('${item.id}')">🗑️</button>
+        </td>
+      `;
+      return tr;
+    }
+
+    function updateCalculations() {
+      let totalP1 = 0;
+      let totalP2 = 0;
+      let boughtCount = 0;
+
+      items.forEach(item => {
+        const total = item.price * item.qty;
+        if (item.calc) {
+          if (item.part === 'p1') totalP1 += total;
+          if (item.part === 'p2') totalP2 += total;
+        }
+        if (item.bought) boughtCount++;
+      });
+
+      document.getElementById('total-p1').innerText = formatMoney(totalP1);
+      document.getElementById('total-p2').innerText = formatMoney(totalP2);
+      document.getElementById('grand-total').innerText = formatMoney(totalP1 + totalP2);
+
+      const totalItems = items.length;
+      document.getElementById('purchase-progress').innerText = `${boughtCount}/${totalItems}`;
+      const percentage = totalItems > 0 ? (boughtCount / totalItems) * 100 : 0;
+      document.getElementById('progress-fill').style.width = `${percentage}%`;
+    }
+
+    function toggleCalc(id) {
+      const item = items.find(i => i.id === id);
+      if (item) { item.calc = !item.calc; render(); }
+    }
+
+    function toggleBought(id) {
+      const item = items.find(i => i.id === id);
+      if (item) { item.bought = !item.bought; render(); }
+    }
+
+    function deleteItem(id) {
+      if (confirm('Bạn muốn xóa món đồ này khỏi danh sách?')) {
+        items = items.filter(i => i.id !== id);
+        render();
+      }
+    }
+
+    function openModal(editId = null) {
+      document.getElementById('itemForm').reset();
+      document.getElementById('itemId').value = '';
+      document.getElementById('itemNote').value = '';
+      document.getElementById('modalTitle').innerText = 'Thêm Món Đồ Mới';
+      togglePartSelect();
+
+      if (editId) {
+        const item = items.find(i => i.id === editId);
+        if (item) {
+          document.getElementById('itemId').value = item.id;
+          document.getElementById('itemPart').value = item.part;
+          document.getElementById('itemName').value = item.name;
+          document.getElementById('itemPrice').value = item.price;
+          document.getElementById('itemQty').value = item.qty;
+          document.getElementById('itemNote').value = item.note || '';
+          togglePartSelect();
+          if (item.part === 'p2') {
+            document.getElementById('itemSubject').value = item.subject || 'Toán';
+            document.getElementById('itemCategory').value = item.category || 'Sách tham khảo';
+          }
+          document.getElementById('modalTitle').innerText = 'Chỉnh Sửa Món Đồ';
+        }
+      }
+      document.getElementById('itemModal').style.display = 'flex';
+    }
+
+    function closeModal() {
+      document.getElementById('itemModal').style.display = 'none';
+    }
+
+    function togglePartSelect() {
+      const part = document.getElementById('itemPart').value;
+      const display = part === 'p2' ? 'block' : 'none';
+      document.getElementById('groupSubject').style.display = display;
+      document.getElementById('groupCategory').style.display = display;
+    }
+
+    function saveItem(e) {
+      e.preventDefault();
+      const id = document.getElementById('itemId').value;
+      const part = document.getElementById('itemPart').value;
+      const name = document.getElementById('itemName').value;
+      const price = parseFloat(document.getElementById('itemPrice').value);
+      const qty = parseInt(document.getElementById('itemQty').value);
+      const note = document.getElementById('itemNote').value.trim();
+
+      let itemData = { part, name, price, qty, note };
+
+      if (part === 'p2') {
+        itemData.subject = document.getElementById('itemSubject').value;
+        itemData.category = document.getElementById('itemCategory').value;
+      }
+
+      if (id) {
+        // Giữ nguyên trạng thái calc/bought khi chỉnh sửa
+        const index = items.findIndex(i => i.id === id);
+        items[index] = { ...items[index], ...itemData };
+      } else {
+        itemData.id = Date.now().toString();
+        itemData.calc = true;
+        itemData.bought = false;
+        items.push(itemData);
+      }
+
+      closeModal();
+      render();
+    }
+
+    function editItem(id) {
+      openModal(id);
+    }
+
+    function resetDefaultData() {
+      if (confirm('Khôi phục toàn bộ danh sách đồ dùng học tập & sách vở về ban đầu?')) {
+        items = JSON.parse(JSON.stringify(defaultData));
+        render();
+      }
+    }
+
+    function saveToStorage() {
+      localStorage.setItem('study_items_v4', JSON.stringify(items));
+    }
+
+    // Khởi tạo
+    render();
+  </script>
+</body>
+</html>
